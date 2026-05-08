@@ -80,14 +80,3 @@ JWT_SECRET=your_super_secret_jwt_key
     *   `src/context/`: React Context for state management
     *   `src/pages/`: Main application views
     *   `src/index.css`: Global styles
-
-## Evaluation Criteria Addressed
-- Clean, structured code with separated concerns (Routes, Controllers, Models).
-- Fully functional backend API with JWT authentication.
-- Pagination implemented on `GET /api/stories`.
-- Dynamic and aesthetic UI without Tailwind.
-- Proper Git commit history and documentation.
-
-## Bonuses Completed
-- **Pagination**: The API `GET /api/stories?page=1&limit=10` is fully supported and used by the frontend.
-- **Premium Design Aesthetics**: Hand-crafted CSS using glassmorphism, dynamic gradients, CSS variables, and Lucide React icons for a truly "wow" first impression.

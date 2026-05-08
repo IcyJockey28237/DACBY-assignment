@@ -80,3 +80,25 @@ JWT_SECRET=your_super_secret_jwt_key
     *   `src/context/`: React Context for state management
     *   `src/pages/`: Main application views
     *   `src/index.css`: Global styles
+
+## Evaluation Criteria Addressed
+- Clean, structured code with separated concerns (Routes, Controllers, Models).
+- Fully functional backend API with JWT authentication.
+- Pagination implemented on `GET /api/stories`.
+- Dynamic and aesthetic UI without Tailwind.
+
+## Bonuses Completed
+- **Pagination**: The API `GET /api/stories?page=1&limit=10` is fully supported and used by the frontend.
+- **Premium Design Aesthetics**: Hand-crafted CSS using glassmorphism, dynamic gradients, CSS variables, and Lucide React icons for a truly "wow" first impression.
+
+## Deploying to Vercel
+
+This repository is pre-configured to be deployed as a full-stack monorepo directly on Vercel.
+
+1. Create a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster and get your connection string.
+2. Push your repository to GitHub.
+3. Import the project into Vercel.
+4. **Important**: Before deploying, add the following Environment Variables in your Vercel project settings:
+   - `MONGODB_URI`: Your MongoDB connection string.
+   - `JWT_SECRET`: A secure random string for JWT authentication.
+5. Vercel will automatically use `vercel.json` to build the frontend with Vite and deploy the backend as Serverless Functions handling all `/api/*` routes.

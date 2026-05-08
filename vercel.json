@@ -7,25 +7,17 @@
     },
     {
       "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "buildCommand": "npm run build",
-        "distDir": "dist"
-      }
+      "use": "@vercel/vite"
     }
   ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "backend/server.js"
+      "destination": "/backend/server.js"
     },
     {
       "source": "/(.*)",
-      "destination": "frontend/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "frontend/index.html"
+      "destination": "/frontend/$1"
     }
   ]
 }

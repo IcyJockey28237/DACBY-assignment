@@ -8,7 +8,10 @@
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "buildCommand": "npm run build",
+        "distDir": "dist"
+      }
     }
   ],
   "rewrites": [
@@ -19,6 +22,10 @@
     {
       "source": "/(.*)",
       "destination": "frontend/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "frontend/index.html"
     }
   ]
 }

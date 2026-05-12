@@ -1,10 +1,20 @@
+const mongoose = require('mongoose');
 const Story = require('../models/Story');
 const User = require('../models/User');
 
 const getStories = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: 'Database connection not ready' });
+    }
+
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    
+    // Ensure positive values
+    if (page < 1) page = 1;
+    if (limit < 1) limit = 10;
+    
     const skip = (page - 1) * limit;
 
     const stories = await Story.find({})

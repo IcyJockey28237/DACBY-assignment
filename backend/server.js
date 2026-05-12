@@ -10,19 +10,9 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-
-app.use('/api/auth', authRoutes);
-app.use('/api/stories', storyRoutes);
-app.use('/api/scrape', scrapeRoutes);
-
-app.use(notFound);
-app.use(errorHandler);
-
-const PORT = process.env.PORT || 5000;
-
 const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+
   try {
     let mongoUri = process.env.MONGODB_URI;
     
@@ -34,39 +24,58 @@ const connectDB = async () => {
     }
 
     if (!mongoUri) {
-        throw new Error('MONGODB_URI is not defined');
+        console.error('MONGODB_URI is not defined');
+        return;
     }
 
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');
     
-    // Run scraper initial scrape if stories are empty
-    const Story = require('./models/Story');
-    const storyCount = await Story.countDocuments();
-    if (storyCount === 0) {
+    // Background task for initial scrape if stories are empty
+    const runInitialScrape = async () => {
         try {
-            console.log('No stories found. Running initial scrape...');
-            await scrapeHackerNews();
-        } catch(err) {
-            console.error('Initial scrape failed:', err);
+            const Story = require('./models/Story');
+            const storyCount = await Story.countDocuments();
+            if (storyCount === 0) {
+                console.log('No stories found. Running initial scrape...');
+                await scrapeHackerNews();
+            }
+        } catch (err) {
+            console.error('Initial scrape task failed:', err);
         }
-    }
+    };
+    
+    runInitialScrape();
+    
   } catch (err) {
     console.error('MongoDB connection error:', err);
   }
 };
 
-// For Vercel, we don't always want to call listen
+app.use(cors());
+app.use(express.json());
+
+// Middleware to ensure DB is connected before handling routes
+app.use(async (req, res, next) => {
+    await connectDB();
+    next();
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api/stories', storyRoutes);
+app.use('/api/scrape', scrapeRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+
 if (process.env.NODE_ENV !== 'production') {
     connectDB().then(() => {
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
     });
-} else {
-    // In production (Vercel), we connect to DB but don't call listen
-    // Vercel handles the lifecycle
-    connectDB();
 }
 
 module.exports = app;

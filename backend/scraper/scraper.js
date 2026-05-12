@@ -36,15 +36,22 @@ const scrapeHackerNews = async () => {
     });
 
     // Save to MongoDB
-    for (const storyData of stories) {
-      await Story.findOneAndUpdate(
+    const savePromises = stories.map(async (storyData) => {
+      if (!storyData.title || !storyData.url) {
+        console.warn('Skipping story due to missing data:', storyData);
+        return;
+      }
+      
+      return Story.findOneAndUpdate(
         { hnId: storyData.hnId },
         storyData,
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
-    }
+    });
 
-    console.log('Successfully scraped top 10 Hacker News stories.');
+    await Promise.all(savePromises);
+
+    console.log(`Successfully processed ${stories.length} Hacker News stories.`);
     return stories;
   } catch (error) {
     console.error('Error scraping Hacker News:', error);

@@ -22,7 +22,9 @@ const Home = () => {
       setTotalPages(res.data.pages);
       setPage(res.data.page);
     } catch (error) {
-      console.error('Error fetching stories', error);
+      const errorMsg = error.response?.data?.message || error.message;
+      console.error('Error fetching stories:', errorMsg);
+      // Optional: Add a state for showing error to user
     } finally {
       setLoading(false);
     }
@@ -34,7 +36,7 @@ const Home = () => {
       const res = await api.get('/stories/bookmarks');
       setUserBookmarks(res.data.map(b => b._id || b));
     } catch (error) {
-      console.error('Error fetching bookmarks', error);
+      console.error('Error fetching bookmarks:', error.response?.data?.message || error.message);
     }
   };
 
@@ -51,7 +53,9 @@ const Home = () => {
       await api.post('/scrape');
       await fetchStories(1);
     } catch (error) {
-      console.error('Error scraping stories', error);
+      const errorMsg = error.response?.data?.message || error.message;
+      console.error('Error scraping stories:', errorMsg);
+      alert(`Scrape failed: ${errorMsg}`);
     } finally {
       setScraping(false);
     }

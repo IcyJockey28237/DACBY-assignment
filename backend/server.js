@@ -13,22 +13,28 @@ const app = express();
 const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
 
-  try {
-    let mongoUri = process.env.MONGODB_URI;
-    
-    if (!mongoUri && process.env.NODE_ENV !== 'production') {
+  let mongoUri = process.env.MONGODB_URI;
+  
+  if (!mongoUri && process.env.NODE_ENV !== 'production') {
+    try {
       const { MongoMemoryServer } = require('mongodb-memory-server');
       const mongoServer = await MongoMemoryServer.create();
       mongoUri = mongoServer.getUri();
       console.log('Using in-memory MongoDB for development/testing');
+    } catch (err) {
+      console.error('Failed to create MongoMemoryServer:', err);
     }
+  }
 
-    if (!mongoUri) {
-        console.error('MONGODB_URI is not defined');
-        return;
-    }
+  if (!mongoUri) {
+      throw new Error('MONGODB_URI is not defined. Please check your environment variables.');
+  }
 
-    await mongoose.connect(mongoUri);
+  try {
+    // Set some options for better serverless behavior
+    await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+    });
     console.log('Connected to MongoDB');
     
     // Background task for initial scrape if stories are empty
@@ -49,6 +55,7 @@ const connectDB = async () => {
     
   } catch (err) {
     console.error('MongoDB connection error:', err);
+    throw new Error(`Failed to connect to MongoDB: ${err.message}`);
   }
 };
 
@@ -57,8 +64,14 @@ app.use(express.json());
 
 // Middleware to ensure DB is connected before handling routes
 app.use(async (req, res, next) => {
-    await connectDB();
-    next();
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        // Pass the error to the global error handler
+        res.status(503);
+        next(err);
+    }
 });
 
 app.use('/api/auth', authRoutes);

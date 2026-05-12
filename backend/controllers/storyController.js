@@ -4,10 +4,6 @@ const User = require('../models/User');
 
 const getStories = async (req, res) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ message: 'Database connection not ready' });
-    }
-
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     

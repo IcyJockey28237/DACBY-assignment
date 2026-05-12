@@ -33,7 +33,8 @@ const connectDB = async () => {
   try {
     // Set some options for better serverless behavior
     await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      serverSelectionTimeoutMS: 10000, // Increased for Atlas SRV DNS resolution in serverless
+      bufferCommands: false,           // Fail fast instead of queuing when DB is unreachable
     });
     console.log('Connected to MongoDB');
     
